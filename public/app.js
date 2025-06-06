@@ -7,7 +7,8 @@ Document.addEventListener('DOMContentLoaded', () => {
   const errorModal = document.getElementById('errorModal');
   const errorMessage = document.getElementById('errorMessage');
   const retryBtn = document.getElementById('retryBtn');
-  
+  const mainFooter = document.getElementById('main-footer'); // Referenz zum Footer
+
   let currentSearch = '';
 
   // API-Anfrage mit Error-Handling
@@ -15,10 +16,18 @@ Document.addEventListener('DOMContentLoaded', () => {
     try {
       showLoading(targetContainer, query);
       
+      // Nutze den `/api/` Pfad, der von next.config.js umgeleitet wird
       const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`); 
       
       if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
+        // Bei einem Fehler, versuche einen Fallback-API-Mirror
+        console.warn(`Primary API failed with status ${response.status}. Trying fallback...`);
+        const fallbackResponse = await fetch(`/fallback-api/q.php?q=${encodeURIComponent(query)}`);
+        if (!fallbackResponse.ok) {
+          throw new Error(`All APIs failed: Primary status ${response.status}, Fallback status ${fallbackResponse.status}`);
+        }
+        const fallbackData = await fallbackResponse.json();
+        return fallbackData;
       }
       
       const data = await response.json();
@@ -168,4 +177,22 @@ Document.addEventListener('DOMContentLoaded', () => {
       <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
     </div>
   `;
+
+  // Stellt sicher, dass der Footer am unteren Rand bleibt
+  function adjustFooterPosition() {
+    const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
+    const windowHeight = window.innerHeight;
+    if (contentHeight < windowHeight) {
+      mainFooter.style.position = 'fixed';
+      mainFooter.style.bottom = '0';
+      mainFooter.style.left = '0';
+      mainFooter.style.width = '100%';
+    } else {
+      mainFooter.style.position = 'static';
+    }
+  }
+
+  // Führe die Anpassung beim Laden und bei Größenänderung des Fensters aus
+  adjustFooterPosition();
+  window.addEventListener('resize', adjustFooterPosition);
 });
