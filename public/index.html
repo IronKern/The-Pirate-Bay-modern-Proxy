@@ -25,6 +25,12 @@
         </div>
       </header>
 
+      <section class="system-status-section">
+        <p id="systemStatusText" class="status-text">Systemstatus: <span id="statusIndicator">Wird geprüft...</span></p>
+        <ul id="systemErrors" class="error-list">
+          </ul>
+      </section>
+
       <section class="search-section">
         <div class="search-box">
           <input 
@@ -49,9 +55,9 @@
 
     <div id="errorModal" class="modal">
       <div class="modal-content">
-        <h3>🚨 API-Fehler</h3>
-        <p id="errorMessage">Die Anfrage konnte nicht verarbeitet werden.</p>
-        <button id="retryBtn">Erneut versuchen</button>
+        <h3>🚨 Fehler</h3>
+        <p id="errorMessage">Ein Problem ist aufgetreten.</p>
+        <button id="retryBtn">OK</button>
       </div>
     </div>
   </div>
