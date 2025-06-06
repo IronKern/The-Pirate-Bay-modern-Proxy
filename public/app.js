@@ -1,8 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+Document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const searchInput = document.getElementById('searchInput');
   const searchBtn = document.getElementById('searchBtn');
   const resultsContainer = document.getElementById('results');
+  const recommendationsContainer = document.getElementById('recommendations'); // Neuer Container für Empfehlungen
   const errorModal = document.getElementById('errorModal');
   const errorMessage = document.getElementById('errorMessage');
   const retryBtn = document.getElementById('retryBtn');
@@ -10,11 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentSearch = '';
 
   // API-Anfrage mit Error-Handling
-  async function fetchTorrents(query) {
+  async function fetchTorrents(query, targetContainer) {
     try {
-      showLoading();
+      showLoading(targetContainer, query);
       
-      const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`);
+      // Nutze den neuen API-Endpunkt, um die bestehenden Endpunkte nicht zu stören
+      const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`); 
       
       if (!response.ok) {
         throw new Error(`Server responded with ${response.status}`);
@@ -32,22 +34,28 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('API Error:', error);
       showError(`API-Fehler: ${error.message}`);
       return null;
+    } finally {
+      // Das Lade-Placeholder wird hier entfernt, wenn Daten geladen wurden
+      // oder ein Fehler auftrat
+      if (targetContainer.querySelector('.placeholder')) {
+        targetContainer.querySelector('.placeholder').remove();
+      }
     }
   }
 
-  // Ergebnisse anzeigen
-  function displayResults(data) {
+  // Ergebnisse/Empfehlungen anzeigen
+  function displayTorrents(data, container) {
     if (!data || data.length === 0) {
-      resultsContainer.innerHTML = `
-        <div class="placeholder animate__animated animate__fadeIn">
-          <p>Keine Ergebnisse gefunden für "${currentSearch}"</p>
+      container.innerHTML = `
+        <div class="placeholder">
+          <p>Keine Ergebnisse gefunden.</p>
         </div>
       `;
       return;
     }
     
-    resultsContainer.innerHTML = data.map(torrent => `
-      <div class="torrent-card animate__animated animate__fadeIn">
+    container.innerHTML = data.map(torrent => `
+      <div class="torrent-card">
         <h3 class="torrent-name">${torrent.name || 'Unbekannter Torrent'}</h3>
         <div class="torrent-meta">
           <span>💾 ${formatSize(torrent.size)}</span>
@@ -64,14 +72,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Hilfsfunktionen
   function formatSize(bytes) {
     if (!bytes) return '0 MB';
-    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
   }
 
-  function showLoading() {
-    resultsContainer.innerHTML = `
+  function showLoading(container, queryText) {
+    container.innerHTML = `
       <div class="placeholder">
-        <div class="neon-loader"></div>
-        <p>Suche nach "${currentSearch}"...</p>
+        <div class="loader"></div>
+        <p>Suche nach "${queryText}"...</p>
       </div>
     `;
   }
@@ -100,21 +110,45 @@ document.addEventListener('DOMContentLoaded', () => {
   // Hauptsuchfunktion
   async function executeSearch() {
     const query = searchInput.value.trim();
-    if (!query) return;
+    if (!query) {
+      resultsContainer.innerHTML = `
+        <div class="placeholder">
+          <p>Bitte gib einen Suchbegriff ein.</p>
+        </div>
+      `;
+      return;
+    }
     
     currentSearch = query;
-    const data = await fetchTorrents(query);
+    const data = await fetchTorrents(query, resultsContainer);
     
     if (data) {
-      displayResults(data);
+      displayTorrents(data, resultsContainer);
+      // Wenn eine Suche durchgeführt wird, leere die Empfehlungen
+      recommendationsContainer.innerHTML = ''; 
+      document.querySelector('.recommendations-section .section-title').style.display = 'none';
     }
   }
 
-  // Initialer Platzhalter
+  // Empfehlungen beim Laden der Seite
+  async function loadRecommendations() {
+    // Hier kannst du einige Standard-Suchbegriffe für Empfehlungen verwenden
+    // Oder eine dedizierte API für zufällige/beliebte Torrents (falls vorhanden)
+    const recommendedQueries = ["linux", "ubuntu", "public domain movies"]; 
+    const randomQuery = recommendedQueries[Math.floor(Math.random() * recommendedQueries.length)];
+
+    document.querySelector('.recommendations-section .section-title').style.display = 'block'; // Titel anzeigen
+    const data = await fetchTorrents(randomQuery, recommendationsContainer);
+    if (data) {
+      displayTorrents(data, recommendationsContainer);
+    }
+  }
+
+  // Initialisierung
+  loadRecommendations(); // Lade Empfehlungen beim Start
   resultsContainer.innerHTML = `
-    <div class="placeholder animate__animated animate__fadeIn">
-      <div class="neon-loader"></div>
-      <p>Gib einen Suchbegriff ein</p>
+    <div class="placeholder">
+      <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
     </div>
   `;
 });
