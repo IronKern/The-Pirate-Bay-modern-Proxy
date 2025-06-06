@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏴‍☠️ Pirate Proxy</title>
+  <link rel="stylesheet" href="/style.css">
+  <link href="https://unpkg.com/tailwindcss@^3.0.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+  <div class="container mx-auto p-4">
+    <!-- Header -->
+    <header class="mb-8 flex justify-between items-center">
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+        Pirate Proxy
+      </h1>
+      <button id="themeToggle" class="p-2 rounded-full bg-purple-600">🌙</button>
+    </header>
+
+    <!-- Suchleiste -->
+    <div class="flex gap-2 mb-8">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Suche Filme, Spiele, Software..." 
+        class="flex-1 p-3 rounded-lg bg-gray-800 border border-purple-500 focus:ring-2 focus:ring-purple-500"
+      >
+      <button 
+        id="searchBtn"
+        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors"
+      >
+        Suchen
+      </button>
+    </div>
+
+    <!-- Ergebnisse -->
+    <div id="results" class="space-y-4"></div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
