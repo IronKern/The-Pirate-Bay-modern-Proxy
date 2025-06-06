@@ -1,60 +1,53 @@
 /* ---------- Globals ---------- */
 :root {
-  --neon-purple: #8b5cf6;
-  --neon-pink: #ec4899;
-  --dark-bg: #0a0a0a;
-  --card-bg: rgba(20, 20, 20, 0.8);
+  --primary-color: #8b5cf6; /* Neon Purple */
+  --secondary-color: #ec4899; /* Neon Pink */
+  --dark-bg: #0d0d0d;
+  --card-bg: #1a1a1a;
+  --text-color: #e0e0e0;
+  --placeholder-color: #777;
+  --border-color: #333;
 }
 
 body {
   background: var(--dark-bg);
-  color: white;
+  color: var(--text-color);
   font-family: 'Inter', sans-serif;
   margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.blur-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
-  z-index: -1;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
-  position: relative;
 }
 
 /* ---------- Header & Logo ---------- */
 .header {
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   text-align: center;
 }
 
 .logo-container {
   display: inline-flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.7));
+  width: 36px;
+  height: 36px;
 }
 
 .logo-text {
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 700;
   margin: 0;
-  background: linear-gradient(90deg, #FFF 70%, var(--neon-purple) 100%);
+  background: linear-gradient(90deg, #FFF 70%, var(--primary-color) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -62,162 +55,171 @@ body {
 
 .logo-text span {
   font-weight: 300;
+  color: var(--primary-color);
 }
 
 /* ---------- Suchbereich ---------- */
 .search-section {
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .search-box {
-  max-width: 700px;
+  max-width: 600px;
   margin: 0 auto;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 #searchInput {
-  width: 100%;
-  padding: 1.2rem 2rem;
+  flex-grow: 1;
+  padding: 0.9rem 1.2rem;
   background: var(--card-bg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   color: white;
-  font-size: 1.1rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
-  transition: all 0.3s;
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+#searchInput::placeholder {
+  color: var(--placeholder-color);
 }
 
 #searchInput:focus {
   outline: none;
-  border-color: var(--neon-purple);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-  animation: none !important;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
 }
 
 #searchBtn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  margin-left: 0.5rem;
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 #searchBtn:hover {
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  background: linear-gradient(135deg, #7c4dff, #e03c8c);
+  transform: translateY(-1px);
+}
+
+#searchBtn:active {
+  transform: translateY(0);
 }
 
 .search-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   fill: white;
 }
 
-/* ---------- Ergebnisse ---------- */
+/* ---------- Sektionstitel ---------- */
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+/* ---------- Ergebnisse & Empfehlungen ---------- */
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
 }
 
 .torrent-card {
   background: var(--card-bg);
-  border-radius: 12px;
-  padding: 1.5rem;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s;
-  animation: fadeIn 0.5s ease-out;
+  border-radius: 8px;
+  padding: 1.2rem;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .torrent-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
-  border-color: var(--neon-purple);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .torrent-name {
-  font-size: 1.1rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
   line-height: 1.4;
+  color: var(--text-color);
+  word-wrap: break-word; /* Lange Namen umbrechen */
 }
 
 .torrent-meta {
   display: flex;
-  gap: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  margin-bottom: 1.2rem;
+  flex-wrap: wrap; /* Bei kleinen Bildschirmen umbrechen */
+  gap: 0.8rem;
+  color: var(--placeholder-color);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
 }
 
 .magnet-link {
   display: inline-block;
-  padding: 0.6rem 1.2rem;
-  background: rgba(139, 92, 246, 0.15);
-  color: var(--neon-purple);
-  border-radius: 30px;
+  padding: 0.5rem 1rem;
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--primary-color);
+  border-radius: 5px;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.3s;
+  font-size: 0.85rem;
+  transition: background 0.2s ease-in-out;
   border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .magnet-link:hover {
-  background: rgba(139, 92, 246, 0.3);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.2);
 }
 
 /* ---------- Platzhalter & Ladeanimation ---------- */
 .placeholder {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 3rem 0;
-  color: rgba(255, 255, 255, 0.5);
+  padding: 2rem 0;
+  color: var(--placeholder-color);
+  font-size: 1rem;
 }
 
-.neon-loader {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 1.5rem;
-  border: 3px solid rgba(139, 92, 246, 0.3);
-  border-top-color: var(--neon-purple);
+.loader {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top: 3px solid var(--primary-color);
   border-radius: 50%;
-  animation: spin 1s linear infinite, pulse 2s infinite;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* ---------- Footer ---------- */
 .footer {
   text-align: center;
-  margin-top: 3rem;
+  margin-top: 2.5rem;
   padding: 1.5rem 0;
-  position: relative;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
-}
-
-.footer-glow {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  height: 50px;
-  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+  color: var(--placeholder-color);
+  font-size: 0.85rem;
 }
 
 .brand {
-  color: var(--neon-purple);
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -233,66 +235,75 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
   background: var(--card-bg);
   padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
+  border-radius: 8px;
+  max-width: 380px;
   width: 90%;
   text-align: center;
-  border: 1px solid var(--neon-purple);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 5px 25px rgba(139, 92, 246, 0.3);
+}
+
+.modal-content h3 {
+  color: var(--secondary-color);
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+#errorMessage {
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
 }
 
 #retryBtn {
-  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
   color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 30px;
-  margin-top: 1.5rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
 
 #retryBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+  background: linear-gradient(135deg, #7c4dff, #e03c8c);
+  transform: translateY(-1px);
 }
 
-/* ---------- Animationen ---------- */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-  70% { box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+#retryBtn:active {
+  transform: translateY(0);
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 768px) {
   .container {
-    padding: 1.5rem;
+    padding: 1rem;
   }
   
   .logo-text {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
+  .search-box {
+    flex-direction: column;
+  }
+
   #searchInput {
-    padding: 1rem 1.5rem;
+    width: 100%;
+    margin-bottom: 0.8rem;
   }
-  
+
+  #searchBtn {
+    width: 100%;
+    margin-left: 0;
+    height: 40px;
+  }
+
   .results-grid {
     grid-template-columns: 1fr;
   }
