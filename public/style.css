@@ -1,32 +1,60 @@
 /* ---------- Globals ---------- */
 :root {
-  --primary-color: #8b5cf6; /* Neon Purple */
-  --secondary-color: #ec4899; /* Neon Pink */
-  --dark-bg: #0a0a0a;
-  --card-bg: #1e1e1e;
-  --text-color: #f0f0f0;
+  --primary-color: #8B5CF6; /* Dein Neon Purple */
+  --secondary-color: #EC4899; /* Dein Neon Pink */
+  --dark-bg: #0A0A0A;
+  --card-bg: rgba(20, 20, 20, 0.85); /* Etwas transparenter für den Blur */
+  --text-color: #F0F0F0;
   --placeholder-color: #888;
   --border-color: #333;
-  --hover-shadow: rgba(139, 92, 246, 0.2);
+  --neon-glow: rgba(139, 92, 246, 0.4); /* Starker Neon-Schatten */
+  --subtle-glow: rgba(139, 92, 246, 0.1); /* Subtiler Neon-Schatten */
+}
+
+html, body {
+  height: 100%; /* Wichtig für festen Footer */
+  margin: 0;
+  padding: 0;
 }
 
 body {
   background: var(--dark-bg);
   color: var(--text-color);
   font-family: 'Inter', sans-serif;
-  margin: 0;
-  min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden; /* Verhindert horizontales Scrollen bei Animationen */
+  display: flex;
+  flex-direction: column; /* Für festen Footer */
+}
+
+/* Wrapper für den Hauptinhalt, damit der Footer fest sitzt */
+.content-wrapper {
+  flex: 1; /* Nimmt den restlichen Platz ein */
+  min-height: calc(100vh - 80px); /* Annahme: Footer-Höhe ca. 80px */
 }
 
 .container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 1.5rem; /* Etwas weniger Padding für mobile */
+  padding: 1.5rem;
   position: relative;
+  z-index: 1; /* Stellt sicher, dass Inhalte über dem Hintergrund-Glow liegen */
+}
+
+/* Hintergrund-Glow-Effekt */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 10%, var(--neon-glow) 0%, transparent 60%);
+  opacity: 0.15;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* ---------- Header & Logo ---------- */
@@ -39,19 +67,19 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
+  filter: drop-shadow(0 0 8px var(--neon-glow)); /* Stärkerer Schatten für Logo */
 }
 
 .logo-icon {
-  width: 36px;
-  height: 36px;
-  filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.5)); /* Subtiler Schatten */
+  width: 38px; /* Leicht vergrößert */
+  height: 38px;
 }
 
 .logo-text {
-  font-size: 2.2rem;
+  font-size: 2.4rem; /* Leicht vergrößert */
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(90deg, #FFF 70%, var(--primary-color) 100%);
+  background: linear-gradient(90deg, #FFF 60%, var(--primary-color) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -68,22 +96,24 @@ body {
 }
 
 .search-box {
-  max-width: 600px;
+  max-width: 650px; /* Leicht verbreitert */
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Abstand zwischen Input und Button */
+  gap: 0.75rem; /* Etwas mehr Abstand */
 }
 
 #searchInput {
   flex-grow: 1;
-  padding: 0.9rem 1.2rem;
+  padding: 1rem 1.5rem; /* Größeres Padding */
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 30px; /* Stark abgerundet */
   color: white;
-  font-size: 1rem;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  font-size: 1.05rem;
+  backdrop-filter: blur(8px); /* Stärkerer Blur */
+  box-shadow: 0 0 10px var(--subtle-glow); /* Subtiler Standard-Schatten */
+  transition: all 0.3s ease-in-out; /* Übergang für Hover/Focus */
 }
 
 #searchInput::placeholder {
@@ -93,78 +123,100 @@ body {
 #searchInput:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 15px var(--neon-glow); /* Stärkerer Neon-Schatten bei Fokus */
 }
 
 #searchBtn {
-  width: 45px;
-  height: 45px;
+  width: 50px; /* Größerer Button */
+  height: 50px;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
-  border-radius: 8px;
+  border-radius: 50%; /* Rund */
   cursor: pointer;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 10px var(--subtle-glow); /* Standard-Schatten */
+  transition: all 0.3s ease-in-out;
 }
 
 #searchBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px var(--hover-shadow);
+  transform: scale(1.05); /* Sanfter Scale-Effekt */
+  box-shadow: 0 0 20px var(--neon-glow); /* Stärkerer Neon-Schatten */
 }
 
 #searchBtn:active {
-  transform: translateY(0);
-  box-shadow: none;
+  transform: scale(0.98); /* Kleiner "Klick"-Effekt */
+  box-shadow: 0 0 5px var(--neon-glow);
 }
 
 .search-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   fill: white;
 }
 
 /* ---------- Sektionstitel ---------- */
 .section-title {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-color);
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+.section-title::after { /* Lila Unterstrich-Effekt */
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 50px; /* Kurzer lila Strich */
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-color), transparent);
+  box-shadow: 0 0 8px var(--neon-glow);
 }
 
 /* ---------- Ergebnisse & Empfehlungen ---------- */
 .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  gap: 1.2rem; /* Etwas mehr Abstand zwischen Karten */
   margin-bottom: 2.5rem;
 }
 
 .torrent-card {
   background: var(--card-bg);
-  border-radius: 8px;
-  padding: 1.2rem;
+  border-radius: 12px; /* Leicht abgerundeter */
+  padding: 1.5rem; /* Mehr Padding */
   border: 1px solid var(--border-color);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  backdrop-filter: blur(5px); /* Blur auf Karten */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); /* Sanfter Schatten */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
   opacity: 0; /* Standard für Fade-In */
-  transform: translateY(10px); /* Für sanften Slide-Up Effekt */
+  transform: translateY(15px); /* Für sanften Slide-Up Effekt */
+}
+
+.torrent-card:hover {
+  transform: translateY(-5px); /* Mehr Hover-Effekt */
+  box-shadow: 0 8px 25px var(--neon-glow); /* Stärkerer Neon-Schatten bei Hover */
+  border-color: var(--primary-color); /* Lila Rahmen bei Hover */
 }
 
 .torrent-card.fade-in {
-  animation: fadeInSlideUp 0.4s ease-out forwards;
+  animation: fadeInSlideUp 0.5s ease-out forwards;
 }
 
 .torrent-card.fade-out {
-  animation: fadeOutSlideDown 0.2s ease-out forwards;
+  animation: fadeOutSlideDown 0.3s ease-out forwards;
 }
 
 .torrent-name {
-  font-size: 1.05rem;
-  margin-bottom: 0.6rem;
-  line-height: 1.4;
+  font-size: 1.15rem; /* Leicht vergrößert */
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
   color: var(--text-color);
   word-wrap: break-word;
 }
@@ -172,36 +224,38 @@ body {
 .torrent-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
+  gap: 1rem;
   color: var(--placeholder-color);
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
+  font-size: 0.9rem; /* Leicht vergrößert */
+  margin-bottom: 1.2rem;
 }
 
 .magnet-link {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  background: rgba(139, 92, 246, 0.1);
+  padding: 0.7rem 1.4rem; /* Größerer Button */
+  background: rgba(139, 92, 246, 0.15); /* Etwas stärkerer Lila-Hintergrund */
   color: var(--primary-color);
-  border-radius: 5px;
+  border-radius: 20px; /* Abgerundet */
   text-decoration: none;
-  font-size: 0.85rem;
-  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
   border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .magnet-link:hover {
-  background: rgba(139, 92, 246, 0.25);
-  transform: translateY(-1px);
+  background: rgba(139, 92, 246, 0.3); /* Stärkerer Hintergrund bei Hover */
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px var(--subtle-glow); /* Subtiler Glow */
 }
 
 /* ---------- Platzhalter & Ladeanimation ---------- */
 .placeholder {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 2rem 0;
+  padding: 3rem 0;
   color: var(--placeholder-color);
-  font-size: 1rem;
+  font-size: 1.1rem;
   opacity: 0; /* Für Fade-In */
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -209,9 +263,9 @@ body {
 .loader-wrapper {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 2rem 0;
+  padding: 3rem 0;
   color: var(--placeholder-color);
-  font-size: 1rem;
+  font-size: 1.1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -221,27 +275,33 @@ body {
 }
 
 .loader {
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  border-top: 3px solid var(--primary-color);
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  width: 50px; /* Größerer Loader */
+  height: 50px;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; /* Flüssigere Animation */
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 10px var(--neon-glow); /* Neon-Glow für Loader */
 }
 
 /* ---------- Footer ---------- */
 .footer {
   text-align: center;
-  margin-top: 2.5rem;
   padding: 1.5rem 0;
   color: var(--placeholder-color);
   font-size: 0.85rem;
+  background-color: var(--dark-bg); /* Hintergrund für Footer */
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3); /* Schatten nach oben */
+  position: relative;
+  z-index: 10; /* Über anderen Elementen */
 }
 
-.brand {
+.footer .brand {
   color: var(--primary-color);
   font-weight: 600;
+  filter: drop-shadow(0 0 3px var(--subtle-glow));
 }
 
 /* ---------- Error Modal ---------- */
@@ -251,12 +311,12 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85); /* Etwas dunklerer Overlay */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px); /* Stärkerer Blur */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -269,16 +329,16 @@ body {
 
 .modal-content {
   background: var(--card-bg);
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 380px;
+  padding: 2.5rem; /* Mehr Padding */
+  border-radius: 12px;
+  max-width: 450px; /* Etwas breiter */
   width: 90%;
   text-align: center;
   border: 1px solid var(--primary-color);
-  box-shadow: 0 5px 25px rgba(139, 92, 246, 0.3);
-  transform: translateY(20px);
+  box-shadow: 0 0 40px var(--neon-glow); /* Starker Neon-Schatten */
+  transform: translateY(30px); /* Mehr Slide-Effekt */
   opacity: 0;
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease-in-out;
 }
 
 .modal.is-visible .modal-content {
@@ -289,27 +349,32 @@ body {
 .modal-content h3 {
   color: var(--secondary-color);
   margin-top: 0;
-  font-size: 1.5rem;
+  font-size: 1.8rem; /* Größerer Titel */
+  text-shadow: 0 0 5px var(--secondary-color); /* Leuchter Effekt */
 }
 
 #errorMessage {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   color: var(--text-color);
+  font-size: 1.05rem;
 }
 
 #retryBtn {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
   color: white;
-  padding: 0.7rem 1.4rem;
-  border-radius: 5px;
+  padding: 0.8rem 1.6rem; /* Größerer Button */
+  border-radius: 25px; /* Abgerundet */
   cursor: pointer;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 0 10px var(--subtle-glow);
+  transition: all 0.3s ease-in-out;
 }
 
 #retryBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px var(--hover-shadow);
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px var(--neon-glow);
 }
 
 #retryBtn:active {
@@ -319,6 +384,7 @@ body {
 
 /* ---------- Animationen ---------- */
 @keyframes spin {
+  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
@@ -333,13 +399,13 @@ body {
 }
 
 @keyframes fadeInSlideUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeOutSlideDown {
   from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(10px); }
+  to { opacity: 0; transform: translateY(15px); }
 }
 
 /* ---------- Responsive ---------- */
@@ -354,20 +420,39 @@ body {
   
   .search-box {
     flex-direction: column;
-    gap: 0.8rem; /* Mehr Abstand auf kleinen Bildschirmen */
+    gap: 0.8rem;
   }
 
   #searchInput {
     width: 100%;
-    margin-bottom: 0; /* Nicht mehr nötig da gap vorhanden */
+    margin-bottom: 0;
+    padding: 0.8rem 1.2rem;
   }
 
   #searchBtn {
     width: 100%;
-    height: 40px;
+    height: 45px;
+    border-radius: 8px; /* Weniger abgerundet für Full-Width */
   }
 
   .results-grid {
     grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .torrent-card {
+    padding: 1rem;
+  }
+
+  .torrent-name {
+    font-size: 1rem;
+  }
+
+  .torrent-meta, .magnet-link {
+    font-size: 0.8rem;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
   }
 }
