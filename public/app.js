@@ -3,11 +3,10 @@ Document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const searchBtn = document.getElementById('searchBtn');
   const resultsContainer = document.getElementById('results');
-  const recommendationsContainer = document.getElementById('recommendations');
   const errorModal = document.getElementById('errorModal');
   const errorMessage = document.getElementById('errorMessage');
   const retryBtn = document.getElementById('retryBtn');
-  const mainFooter = document.getElementById('main-footer'); // Referenz zum Footer
+  const mainFooter = document.getElementById('main-footer');
 
   let currentSearch = '';
 
@@ -16,11 +15,9 @@ Document.addEventListener('DOMContentLoaded', () => {
     try {
       showLoading(targetContainer, query);
       
-      // Nutze den `/api/` Pfad, der von next.config.js umgeleitet wird
       const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`); 
       
       if (!response.ok) {
-        // Bei einem Fehler, versuche einen Fallback-API-Mirror
         console.warn(`Primary API failed with status ${response.status}. Trying fallback...`);
         const fallbackResponse = await fetch(`/fallback-api/q.php?q=${encodeURIComponent(query)}`);
         if (!fallbackResponse.ok) {
@@ -33,14 +30,14 @@ Document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       if (!Array.isArray(data)) {
-        throw new Error('Invalid API response');
+        throw new Error('Invalid API response: Expected array, got something else.');
       }
       
       return data;
       
     } catch (error) {
       console.error('API Error:', error);
-      showError(`API-Fehler: ${error.message}`);
+      showError(`API-Fehler: ${error.message}. Bitte versuche es später erneut.`);
       return null;
     } finally {
       // Lade-Placeholder nach der Anfrage entfernen
@@ -51,7 +48,7 @@ Document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Ergebnisse/Empfehlungen anzeigen mit Fade-In Animation
+  // Ergebnisse anzeigen mit Fade-In Animation
   function displayTorrents(data, container) {
     // Vor dem Hinzufügen neuer Elemente alte entfernen und Fade-Out starten
     Array.from(container.children).forEach(child => {
@@ -65,15 +62,14 @@ Document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { // Verzögerung, um Fade-Out abzuschließen
         container.innerHTML = `
           <div class="placeholder fade-in">
-            <p>Keine Ergebnisse gefunden.</p>
+            <p>Keine Ergebnisse gefunden für "${currentSearch}".</p>
           </div>
         `;
       }, 200); 
       return;
     }
     
-    // Neue Ergebnisse hinzufügen und Fade-In starten
-    setTimeout(() => { // Verzögerung, um Fade-Out abzuschließen
+    setTimeout(() => {
       container.innerHTML = data.map(torrent => `
         <div class="torrent-card fade-in">
           <h3 class="torrent-name">${torrent.name || 'Unbekannter Torrent'}</h3>
@@ -87,7 +83,7 @@ Document.addEventListener('DOMContentLoaded', () => {
           </a>
         </div>
       `).join('');
-    }, 200); // Kurze Verzögerung, damit die Fade-Out-Animation sichtbar wird
+    }, 200);
   }
 
   // Hilfsfunktionen
@@ -95,48 +91,50 @@ Document.addEventListener('DOMContentLoaded', () => {
     if (!bytes) return '0 MB';
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
   }
 
-  // Verbessertes Lade-Overlay
   function showLoading(container, queryText) {
-    // Vorhandene Inhalte ausblenden
     Array.from(container.children).forEach(child => {
       child.classList.add('fade-out');
       child.addEventListener('animationend', () => child.style.display = 'none', { once: true });
     });
 
-    // Loader hinzufügen
     const loaderWrapper = document.createElement('div');
     loaderWrapper.classList.add('loader-wrapper', 'fade-in');
     loaderWrapper.innerHTML = `
       <div class="loader"></div>
       <p>${queryText ? `Suche nach "${queryText}"...` : 'Inhalte werden geladen...'}</p>
     `;
-    container.innerHTML = ''; // Entferne alte Inhalte sofort, um Platz für Loader zu schaffen
+    container.innerHTML = '';
     container.appendChild(loaderWrapper);
   }
 
-
   function showError(message) {
     errorMessage.textContent = message;
-    errorModal.classList.add('is-visible'); // Klasse für Sichtbarkeit
+    errorModal.classList.add('is-visible');
   }
 
   function hideError() {
     errorModal.classList.remove('is-visible');
   }
 
-  // Event-Listener
+  // Event-Listener für den Suchen-Button
   searchBtn.addEventListener('click', executeSearch);
   
+  // Event-Listener für die Enter-Taste im Suchfeld
   searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') executeSearch();
+    if (e.key === 'Enter') {
+      executeSearch();
+    }
   });
 
+  // Event-Listener für den "Erneut versuchen"-Button im Fehler-Modal
   retryBtn.addEventListener('click', () => {
     hideError();
-    if (currentSearch) executeSearch();
+    if (currentSearch) { // Versuche die letzte Suche erneut
+      executeSearch();
+    }
   });
 
   // Hauptsuchfunktion
@@ -152,26 +150,10 @@ Document.addEventListener('DOMContentLoaded', () => {
     
     if (data) {
       displayTorrents(data, resultsContainer);
-      // Wenn eine Suche durchgeführt wird, Empfehlungen ausblenden oder aktualisieren
-      recommendationsContainer.innerHTML = ''; 
-      document.querySelector('.recommendations-section .section-title').style.display = 'none';
     }
   }
 
-  // Empfehlungen beim Laden der Seite
-  async function loadRecommendations() {
-    const recommendedQueries = ["linux", "ubuntu", "public domain movies", "free software"]; 
-    const randomQuery = recommendedQueries[Math.floor(Math.random() * recommendedQueries.length)];
-
-    document.querySelector('.recommendations-section .section-title').style.display = 'block'; 
-    const data = await fetchTorrents(randomQuery, recommendationsContainer);
-    if (data) {
-      displayTorrents(data, recommendationsContainer);
-    }
-  }
-
-  // Initialisierung
-  loadRecommendations(); // Lade Empfehlungen beim Start
+  // Initialisierung: Zeige den Start-Placeholder an
   resultsContainer.innerHTML = `
     <div class="placeholder fade-in">
       <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
