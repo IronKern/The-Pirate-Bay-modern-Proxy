@@ -2,11 +2,12 @@
 :root {
   --primary-color: #8b5cf6; /* Neon Purple */
   --secondary-color: #ec4899; /* Neon Pink */
-  --dark-bg: #0d0d0d;
-  --card-bg: #1a1a1a;
-  --text-color: #e0e0e0;
-  --placeholder-color: #777;
+  --dark-bg: #0a0a0a;
+  --card-bg: #1e1e1e;
+  --text-color: #f0f0f0;
+  --placeholder-color: #888;
   --border-color: #333;
+  --hover-shadow: rgba(139, 92, 246, 0.2);
 }
 
 body {
@@ -18,12 +19,14 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden; /* Verhindert horizontales Scrollen bei Animationen */
 }
 
 .container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1.5rem; /* Etwas weniger Padding für mobile */
+  position: relative;
 }
 
 /* ---------- Header & Logo ---------- */
@@ -41,6 +44,7 @@ body {
 .logo-icon {
   width: 36px;
   height: 36px;
+  filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.5)); /* Subtiler Schatten */
 }
 
 .logo-text {
@@ -66,9 +70,9 @@ body {
 .search-box {
   max-width: 600px;
   margin: 0 auto;
-  position: relative;
   display: flex;
   align-items: center;
+  gap: 0.5rem; /* Abstand zwischen Input und Button */
 }
 
 #searchInput {
@@ -79,7 +83,7 @@ body {
   border-radius: 8px;
   color: white;
   font-size: 1rem;
-  transition: border-color 0.2s ease-in-out;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 #searchInput::placeholder {
@@ -93,26 +97,26 @@ body {
 }
 
 #searchBtn {
-  margin-left: 0.5rem;
   width: 45px;
   height: 45px;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 #searchBtn:hover {
-  background: linear-gradient(135deg, #7c4dff, #e03c8c);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px var(--hover-shadow);
 }
 
 #searchBtn:active {
   transform: translateY(0);
+  box-shadow: none;
 }
 
 .search-icon {
@@ -127,8 +131,8 @@ body {
   font-weight: 600;
   color: var(--text-color);
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* ---------- Ergebnisse & Empfehlungen ---------- */
@@ -145,11 +149,16 @@ body {
   padding: 1.2rem;
   border: 1px solid var(--border-color);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  opacity: 0; /* Standard für Fade-In */
+  transform: translateY(10px); /* Für sanften Slide-Up Effekt */
 }
 
-.torrent-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+.torrent-card.fade-in {
+  animation: fadeInSlideUp 0.4s ease-out forwards;
+}
+
+.torrent-card.fade-out {
+  animation: fadeOutSlideDown 0.2s ease-out forwards;
 }
 
 .torrent-name {
@@ -157,12 +166,12 @@ body {
   margin-bottom: 0.6rem;
   line-height: 1.4;
   color: var(--text-color);
-  word-wrap: break-word; /* Lange Namen umbrechen */
+  word-wrap: break-word;
 }
 
 .torrent-meta {
   display: flex;
-  flex-wrap: wrap; /* Bei kleinen Bildschirmen umbrechen */
+  flex-wrap: wrap;
   gap: 0.8rem;
   color: var(--placeholder-color);
   font-size: 0.85rem;
@@ -177,12 +186,13 @@ body {
   border-radius: 5px;
   text-decoration: none;
   font-size: 0.85rem;
-  transition: background 0.2s ease-in-out;
+  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
   border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .magnet-link:hover {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.25);
+  transform: translateY(-1px);
 }
 
 /* ---------- Platzhalter & Ladeanimation ---------- */
@@ -192,6 +202,22 @@ body {
   padding: 2rem 0;
   color: var(--placeholder-color);
   font-size: 1rem;
+  opacity: 0; /* Für Fade-In */
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.loader-wrapper {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--placeholder-color);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 .loader {
@@ -201,12 +227,7 @@ body {
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  margin-bottom: 1rem;
 }
 
 /* ---------- Footer ---------- */
@@ -231,11 +252,19 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.8);
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.modal.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .modal-content {
@@ -247,6 +276,14 @@ body {
   text-align: center;
   border: 1px solid var(--primary-color);
   box-shadow: 0 5px 25px rgba(139, 92, 246, 0.3);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.modal.is-visible .modal-content {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .modal-content h3 {
@@ -267,16 +304,42 @@ body {
   padding: 0.7rem 1.4rem;
   border-radius: 5px;
   cursor: pointer;
-  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 #retryBtn:hover {
-  background: linear-gradient(135deg, #7c4dff, #e03c8c);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px var(--hover-shadow);
 }
 
 #retryBtn:active {
   transform: translateY(0);
+  box-shadow: none;
+}
+
+/* ---------- Animationen ---------- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutSlideDown {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(10px); }
 }
 
 /* ---------- Responsive ---------- */
@@ -291,16 +354,16 @@ body {
   
   .search-box {
     flex-direction: column;
+    gap: 0.8rem; /* Mehr Abstand auf kleinen Bildschirmen */
   }
 
   #searchInput {
     width: 100%;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0; /* Nicht mehr nötig da gap vorhanden */
   }
 
   #searchBtn {
     width: 100%;
-    margin-left: 0;
     height: 40px;
   }
 
