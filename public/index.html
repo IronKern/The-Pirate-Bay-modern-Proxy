@@ -3,28 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🏴‍☠️ Pirate Proxy</title>
+  <title>⚡ Pirate Proxy | MyFlixi</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Header mit Suchleiste -->
-    <header>
-      <h1 class="title-glitch" data-text="Pirate Proxy">Pirate Proxy</h1>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Suche Torrents..." autocomplete="off">
-        <button id="searchBtn">
-          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3c1-1.1 1.6-2.6 1.6-4.2C16 6.5 13.5 4 10.5 4S5 6.5 5 9.5 7.5 15 10.5 15c1.6 0 3.1-.6 4.2-1.6l.3.3v.8l5 5 1.5-1.5-5-5zm-5 0C8 14 6 12 6 9.5S8 5 10.5 5 15 7 15 9.5 13 14 10.5 14z"/></svg>
-        </button>
+  <div class="blur-overlay"></div>
+  
+  <main class="container">
+    <!-- Header mit Logo -->
+    <header class="header">
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 24 24">
+          <path d="M12 2L4 7v10l8 5 8-5V7L12 2zm0 2.5L18 9v6l-6 3.5-6-3.5V9l6-3.5z" fill="#FFF"/>
+          <path d="M12 6L6 9v6l6 3.5 6-3.5V9l-6-3z" fill="url(#logo-gradient)"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#8B5CF6"/>
+              <stop offset="100%" stop-color="#EC4899"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <h1 class="logo-text">Pirate<span>Proxy</span></h1>
       </div>
     </header>
 
+    <!-- Suchbereich -->
+    <section class="search-section animate__animated animate__fadeIn">
+      <div class="search-box">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Suche Filme, Serien, Games..." 
+          class="animate__animated animate__pulse animate__infinite"
+        >
+        <button id="searchBtn">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <path d="M15.5 14h-.8l-.3-.3c1-1.1 1.6-2.6 1.6-4.2C16 6.5 13.5 4 10.5 4S5 6.5 5 9.5 7.5 15 10.5 15c1.6 0 3.1-.6 4.2-1.6l.3.3v.8l5 5 1.5-1.5-5-5z"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
     <!-- Ergebnisse -->
-    <div id="results">
-      <div class="placeholder">
-        <div class="pulse-loader"></div>
+    <section id="results" class="results-grid">
+      <div class="placeholder animate__animated animate__fadeIn">
+        <div class="neon-loader"></div>
         <p>Gib einen Suchbegriff ein</p>
       </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer animate__animated animate__fadeInUp">
+      <p>© 2024 Pirate Proxy | <span class="brand">MyFlixi</span> Technologies</p>
+      <div class="footer-glow"></div>
+    </footer>
+  </main>
+
+  <!-- Error Modal (hidden by default) -->
+  <div id="errorModal" class="modal">
+    <div class="modal-content animate__animated animate__bounceIn">
+      <h3>🚨 API-Fehler</h3>
+      <p id="errorMessage">Die Anfrage konnte nicht verarbeitet werden.</p>
+      <button id="retryBtn">Erneut versuchen</button>
     </div>
   </div>
 
