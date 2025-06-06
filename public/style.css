@@ -1,93 +1,110 @@
-/* Globale Styles */
+/* ---------- Globals ---------- */
 :root {
-  --primary: #8b5cf6;
-  --primary-dark: #7c3aed;
-  --bg: #000000;
-  --card-bg: #111111;
+  --neon-purple: #8b5cf6;
+  --neon-pink: #ec4899;
+  --dark-bg: #0a0a0a;
+  --card-bg: rgba(20, 20, 20, 0.8);
 }
 
 body {
-  background: var(--bg);
+  background: var(--dark-bg);
   color: white;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
-  padding: 20px;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  z-index: -1;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-/* Glitch-Effekt für Titel */
-.title-glitch {
+  padding: 2rem;
   position: relative;
-  font-size: 3rem;
-  font-weight: 800;
-  color: var(--primary);
+}
+
+/* ---------- Header & Logo ---------- */
+.header {
+  margin-bottom: 3rem;
   text-align: center;
-  margin: 2rem 0;
-  letter-spacing: 2px;
 }
 
-.title-glitch::before, .title-glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.logo-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.title-glitch::before {
-  left: 2px;
-  text-shadow: -2px 0 #00f7ff;
-  clip: rect(44px, 450px, 56px, 0);
-  animation: glitch-anim 2s infinite linear alternate-reverse;
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.7));
 }
 
-.title-glitch::after {
-  left: -2px;
-  text-shadow: -2px 0 #ff00c1;
-  clip: rect(44px, 450px, 56px, 0);
-  animation: glitch-anim-2 2s infinite linear alternate-reverse;
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(90deg, #FFF 70%, var(--neon-purple) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-/* Suchleiste mit Animation */
+.logo-text span {
+  font-weight: 300;
+}
+
+/* ---------- Suchbereich ---------- */
+.search-section {
+  margin-bottom: 3rem;
+}
+
 .search-box {
-  display: flex;
-  max-width: 600px;
-  margin: 2rem auto;
+  max-width: 700px;
+  margin: 0 auto;
   position: relative;
 }
 
 #searchInput {
-  flex: 1;
-  padding: 15px 20px;
-  border: 2px solid #333;
-  border-radius: 30px;
-  background: #111;
+  width: 100%;
+  padding: 1.2rem 2rem;
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
   color: white;
-  font-size: 1rem;
-  outline: none;
+  font-size: 1.1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
   transition: all 0.3s;
 }
 
 #searchInput:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+  outline: none;
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  animation: none !important;
 }
 
 #searchBtn {
   position: absolute;
-  right: 5px;
-  top: 5px;
-  background: var(--primary);
-  border: none;
-  border-radius: 50%;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 50px;
   height: 50px;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  border: none;
+  border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
@@ -96,90 +113,187 @@ body {
 }
 
 #searchBtn:hover {
-  background: var(--primary-dark);
-  transform: scale(1.05);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 .search-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   fill: white;
 }
 
-/* Ergebnisse */
-#results {
-  margin-top: 2rem;
+/* ---------- Ergebnisse ---------- */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .torrent-card {
   background: var(--card-bg);
-  border-left: 4px solid var(--primary);
-  border-radius: 5px;
+  border-radius: 12px;
   padding: 1.5rem;
-  margin-bottom: 1rem;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.3s;
   animation: fadeIn 0.5s ease-out;
 }
 
 .torrent-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+  border-color: var(--neon-purple);
 }
 
 .torrent-name {
-  font-size: 1.2rem;
-  color: var(--primary);
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
 }
 
 .torrent-meta {
   display: flex;
   gap: 1rem;
-  color: #aaa;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
 }
 
 .magnet-link {
   display: inline-block;
-  padding: 8px 16px;
-  background: rgba(139, 92, 246, 0.2);
-  color: var(--primary);
-  border-radius: 20px;
+  padding: 0.6rem 1.2rem;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--neon-purple);
+  border-radius: 30px;
   text-decoration: none;
+  font-size: 0.9rem;
   transition: all 0.3s;
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .magnet-link:hover {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
 }
 
-/* Platzhalter & Ladeanimation */
+/* ---------- Platzhalter & Ladeanimation ---------- */
 .placeholder {
+  grid-column: 1 / -1;
   text-align: center;
-  color: #555;
-  margin-top: 4rem;
+  padding: 3rem 0;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.pulse-loader {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 1rem;
+.neon-loader {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.5rem;
+  border: 3px solid rgba(139, 92, 246, 0.3);
+  border-top-color: var(--neon-purple);
   border-radius: 50%;
-  background: var(--primary);
-  animation: pulse 1.5s infinite ease-in-out;
+  animation: spin 1s linear infinite, pulse 2s infinite;
 }
 
-/* Fehlermeldung */
-.error-message {
+/* ---------- Footer ---------- */
+.footer {
   text-align: center;
-  color: #ff5555;
-  padding: 2rem;
-  border: 1px solid #ff5555;
-  border-radius: 5px;
-  max-width: 600px;
-  margin: 2rem auto;
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  position: relative;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
 }
 
-/* Animationen */
-@keyframes glitch
+.footer-glow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 50px;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+}
+
+.brand {
+  color: var(--neon-purple);
+  font-weight: 600;
+}
+
+/* ---------- Error Modal ---------- */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid var(--neon-purple);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+}
+
+#retryBtn {
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  border: none;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#retryBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+/* ---------- Animationen ---------- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+  
+  .logo-text {
+    font-size: 2rem;
+  }
+  
+  #searchInput {
+    padding: 1rem 1.5rem;
+  }
+  
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+}
