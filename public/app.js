@@ -1,73 +1,120 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // DOM Elements
   const searchInput = document.getElementById('searchInput');
   const searchBtn = document.getElementById('searchBtn');
   const resultsContainer = document.getElementById('results');
+  const errorModal = document.getElementById('errorModal');
+  const errorMessage = document.getElementById('errorMessage');
+  const retryBtn = document.getElementById('retryBtn');
+  
+  let currentSearch = '';
 
-  // Suchfunktion
-  async function searchTorrents(query) {
+  // API-Anfrage mit Error-Handling
+  async function fetchTorrents(query) {
     try {
-      // Ladeanimation anzeigen
-      resultsContainer.innerHTML = `
-        <div class="placeholder">
-          <div class="pulse-loader"></div>
-          <p>Suche läuft...</p>
-        </div>
-      `;
-
-      // API-Anfrage
+      showLoading();
+      
       const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`);
       
-      if (!response.ok) throw new Error('API-Fehler');
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
+      }
       
       const data = await response.json();
       
-      // Ergebnisse anzeigen
-      if (data.length === 0) {
-        resultsContainer.innerHTML = `
-          <div class="placeholder">
-            <p>Keine Ergebnisse gefunden</p>
-          </div>
-        `;
-        return;
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid API response');
       }
-
-      resultsContainer.innerHTML = data.map(torrent => `
-        <div class="torrent-card">
-          <h3 class="torrent-name">${torrent.name}</h3>
-          <div class="torrent-meta">
-            <span>💾 ${(torrent.size / 1024 / 1024).toFixed(2)} MB</span>
-            <span>🔼 ${torrent.seeders || 0}</span>
-            <span>🔽 ${torrent.leechers || 0}</span>
-          </div>
-          <a href="magnet:?xt=urn:btih:${torrent.info_hash}" class="magnet-link">
-            Magnet-Link
-          </a>
-        </div>
-      `).join('');
-
+      
+      return data;
+      
     } catch (error) {
-      console.error('Fehler:', error);
-      resultsContainer.innerHTML = `
-        <div class="error-message">
-          <p>Fehler: ${error.message}</p>
-          <button onclick="window.location.reload()" class="magnet-link" style="margin-top: 1rem;">
-            Erneut versuchen
-          </button>
-        </div>
-      `;
+      console.error('API Error:', error);
+      showError(`API-Fehler: ${error.message}`);
+      return null;
     }
   }
 
-  // Event-Listener
-  searchBtn.addEventListener('click', () => {
-    if (searchInput.value.trim()) {
-      searchTorrents(searchInput.value.trim());
+  // Ergebnisse anzeigen
+  function displayResults(data) {
+    if (!data || data.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="placeholder animate__animated animate__fadeIn">
+          <p>Keine Ergebnisse gefunden für "${currentSearch}"</p>
+        </div>
+      `;
+      return;
     }
+    
+    resultsContainer.innerHTML = data.map(torrent => `
+      <div class="torrent-card animate__animated animate__fadeIn">
+        <h3 class="torrent-name">${torrent.name || 'Unbekannter Torrent'}</h3>
+        <div class="torrent-meta">
+          <span>💾 ${formatSize(torrent.size)}</span>
+          <span>🔼 ${torrent.seeders || 0}</span>
+          <span>🔽 ${torrent.leechers || 0}</span>
+        </div>
+        <a href="magnet:?xt=urn:btih:${torrent.info_hash}" class="magnet-link">
+          Magnet-Link
+        </a>
+      </div>
+    `).join('');
+  }
+
+  // Hilfsfunktionen
+  function formatSize(bytes) {
+    if (!bytes) return '0 MB';
+    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  function showLoading() {
+    resultsContainer.innerHTML = `
+      <div class="placeholder">
+        <div class="neon-loader"></div>
+        <p>Suche nach "${currentSearch}"...</p>
+      </div>
+    `;
+  }
+
+  function showError(message) {
+    errorMessage.textContent = message;
+    errorModal.style.display = 'flex';
+  }
+
+  function hideError() {
+    errorModal.style.display = 'none';
+  }
+
+  // Event-Listener
+  searchBtn.addEventListener('click', executeSearch);
+  
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') executeSearch();
   });
 
-  searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && searchInput.value.trim()) {
-      searchTorrents(searchInput.value.trim());
-    }
+  retryBtn.addEventListener('click', () => {
+    hideError();
+    if (currentSearch) executeSearch();
   });
+
+  // Hauptsuchfunktion
+  async function executeSearch() {
+    const query = searchInput.value.trim();
+    if (!query) return;
+    
+    currentSearch = query;
+    const data = await fetchTorrents(query);
+    
+    if (data) {
+      displayResults(data);
+    }
+  }
+
+  // Initialer Platzhalter
+  resultsContainer.innerHTML = `
+    <div class="placeholder animate__animated animate__fadeIn">
+      <div class="neon-loader"></div>
+      <p>Gib einen Suchbegriff ein</p>
+    </div>
+  `;
 });
