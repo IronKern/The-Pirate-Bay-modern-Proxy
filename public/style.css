@@ -156,7 +156,7 @@ body::before {
   fill: white;
 }
 
-/* ---------- Sektionstitel ---------- */
+/* ---------- Sektionstitel (Falls noch benötigt) ---------- */
 .section-title {
   font-size: 1.5rem;
   font-weight: 600;
@@ -178,7 +178,7 @@ body::before {
   box-shadow: 0 0 8px var(--neon-glow);
 }
 
-/* ---------- Ergebnisse & Empfehlungen ---------- */
+/* ---------- Ergebnisse ---------- */
 .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
