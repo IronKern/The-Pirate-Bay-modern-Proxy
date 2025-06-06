@@ -11,13 +11,17 @@ Document.addEventListener('DOMContentLoaded', () => {
   const statusIndicator = document.getElementById('statusIndicator');
   const systemErrorsList = document.getElementById('systemErrors');
 
-  // ACHTUNG: Hier musst du die URL deines deployten serverless Backends eintragen!
-  const SERVERLESS_API_URL = 'DEINE_SERVERLESS_BACKEND_URL/api/search'; // Beispiel: 'https://dein-projekt.vercel.app/api/search'
+  // ##########################################################################
+  // !!! WICHTIG: HIER MUSST DU DIE URL DEINES DEPLOYTEN SERVERLESS BACKENDS EINTRAGEN !!!
+  // Beispiel: 'https://dein-projekt.vercel.app/api/search'
+  const SERVERLESS_API_URL = 'DEINE_SERVERLESS_BACKEND_URL/api/search'; 
+  // ##########################################################################
 
   let currentSearch = '';
 
   // --- Systemstatus-Prüfung ---
   async function checkSystemStatus() {
+    console.log('Starte Systemstatus-Prüfung...');
     statusIndicator.textContent = 'Wird geprüft...';
     statusIndicator.className = 'status-indicator checking';
     systemErrorsList.innerHTML = ''; // Alte Fehler löschen
@@ -25,57 +29,77 @@ Document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch(`${SERVERLESS_API_URL}?check_status=true`);
       const result = await response.json();
+      console.log('Systemstatus-Backend-Antwort:', result);
 
-      if (result.status === 'Online') {
-        statusIndicator.textContent = 'Online';
-        statusIndicator.className = 'status-indicator online';
-      } else {
-        statusIndicator.textContent = 'Offline / Probleme';
-        statusIndicator.className = 'status-indicator offline';
-        if (result.errors && result.errors.length > 0) {
-          result.errors.forEach(err => {
+      if (response.ok) { // Überprüfe den HTTP-Status des Backends
+        if (result.status === 'Online') {
+          statusIndicator.textContent = 'Online';
+          statusIndicator.className = 'status-indicator online';
+          systemErrorsList.innerHTML = ''; // Sicherstellen, dass keine alten Fehler mehr da sind
+        } else {
+          statusIndicator.textContent = 'Offline / Probleme';
+          statusIndicator.className = 'status-indicator offline';
+          if (result.errors && result.errors.length > 0) {
+            result.errors.forEach(err => {
+              const li = document.createElement('li');
+              li.textContent = err;
+              systemErrorsList.appendChild(li);
+            });
+          } else {
             const li = document.createElement('li');
-            li.textContent = err;
+            li.textContent = 'Unbekanntes Problem bei den externen APIs.';
             systemErrorsList.appendChild(li);
-          });
+          }
         }
+      } else {
+        // Backend hat einen Fehler-HTTP-Status zurückgegeben (z.B. 500)
+        throw new Error(`Backend meldet Fehler: ${result.error || response.statusText}`);
       }
     } catch (error) {
       console.error("Fehler beim Abrufen des Systemstatus:", error);
       statusIndicator.textContent = 'Fehler (Konnte nicht prüfen)';
       statusIndicator.className = 'status-indicator error';
+      systemErrorsList.innerHTML = ''; // Alte Fehler löschen
       const li = document.createElement('li');
-      li.textContent = `Verbindungsfehler: ${error.message}`;
+      li.textContent = `Verbindungsfehler oder Backend-Problem: ${error.message}`;
       systemErrorsList.appendChild(li);
     }
   }
 
   // --- Torrent-Suche über das Serverless Backend ---
   async function fetchTorrents(query, targetContainer) {
+    console.log(`Starte Torrent-Suche für: "${query}"`);
     try {
       showLoading(targetContainer, query);
       
       const response = await fetch(`${SERVERLESS_API_URL}?q=${encodeURIComponent(query)}`);
-      const result = await response.json(); // Backend gibt immer JSON zurück
+      const result = await response.json(); // Backend sollte immer JSON zurückgeben
+      console.log('Torrent-Backend-Antwort:', result);
 
-      if (response.ok) {
+      if (response.ok) { // Prüfe HTTP-Status vom Backend (200 OK)
         if (result.data) {
+          // Backend gibt ein 'data'-Array zurück
           return result.data;
         } else if (result.message === "Keine Ergebnisse gefunden.") {
-          return []; // Backend hat keine Ergebnisse, aber erfolgreich geantwortet
+          // Backend hat explizit gemeldet, dass keine Ergebnisse gefunden wurden
+          return []; 
         } else {
-            // Unerwartetes erfolgreiches Ergebnis
-            throw new Error(`Unerwartete API-Antwort: ${JSON.stringify(result)}`);
+            // Unerwartetes erfolgreiches Ergebnisformat vom Backend
+            console.warn("Unerwartetes erfolgreiches Format vom Backend:", result);
+            return []; // Behandle es als keine Ergebnisse, um Fehler zu vermeiden
         }
       } else {
-        // Fehler vom Backend erhalten (z.B. 400, 500, 503)
-        throw new Error(result.error || `Serverfehler: ${response.status} ${response.statusText}`);
+        // Backend hat einen Fehler-HTTP-Status zurückgegeben (z.B. 400, 500, 503)
+        const errorMsg = result.error || `Serverfehler: ${response.status} ${response.statusText}`;
+        console.error("Backend-Fehler (HTTP-Status nicht OK):", errorMsg, result);
+        throw new Error(errorMsg);
       }
     } catch (error) {
       console.error('API Error in fetchTorrents:', error);
       showError(`Fehler bei der Suche: ${error.message || "Unbekannter Fehler."}`);
       return null; // Gibt null zurück, um anzuzeigen, dass ein Fehler aufgetreten ist
     } finally {
+      // Entferne den Lade-Indikator, egal ob Erfolg oder Fehler
       const loader = targetContainer.querySelector('.loader-wrapper');
       if (loader) {
         loader.remove();
@@ -85,15 +109,20 @@ Document.addEventListener('DOMContentLoaded', () => {
 
   // Ergebnisse anzeigen mit Fade-In Animation
   function displayTorrents(data, container) {
-    Array.from(container.children).forEach(child => {
-      if (child.classList.contains('torrent-card') || child.classList.contains('placeholder')) {
-        child.classList.add('fade-out');
-        child.addEventListener('animationend', () => child.remove(), { once: true });
-      }
-    });
+    console.log('Versuche, Ergebnisse anzuzeigen. Daten:', data);
+    // Entferne alte Elemente mit Fade-Out Animation
+    if (container.children.length > 0) {
+      Array.from(container.children).forEach(child => {
+        if (child.classList.contains('torrent-card') || child.classList.contains('placeholder') || child.classList.contains('loader-wrapper')) {
+          child.classList.add('fade-out');
+          child.addEventListener('animationend', () => child.remove(), { once: true });
+        }
+      });
+    }
 
     if (!data || data.length === 0) {
-      setTimeout(() => {
+      console.log('Keine Daten zum Anzeigen oder Daten leer.');
+      setTimeout(() => { // Kurze Verzögerung für Fade-Out
         container.innerHTML = `
           <div class="placeholder fade-in">
             <p>Keine Ergebnisse gefunden für "${currentSearch || searchInput.value.trim()}".</p>
@@ -103,6 +132,7 @@ Document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    // Füge neue Elemente mit Fade-In Animation hinzu
     setTimeout(() => {
       container.innerHTML = data.map(torrent => `
         <div class="torrent-card fade-in">
@@ -117,6 +147,7 @@ Document.addEventListener('DOMContentLoaded', () => {
           </a>
         </div>
       `).join('');
+      console.log('Ergebnisse erfolgreich im DOM angezeigt.');
     }, 200);
   }
 
@@ -129,84 +160,5 @@ Document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showLoading(container, queryText) {
-    Array.from(container.children).forEach(child => {
-      child.classList.add('fade-out');
-      child.addEventListener('animationend', () => child.style.display = 'none', { once: true });
-    });
-
-    const loaderWrapper = document.createElement('div');
-    loaderWrapper.classList.add('loader-wrapper', 'fade-in');
-    loaderWrapper.innerHTML = `
-      <div class="loader"></div>
-      <p>${queryText ? `Suche nach "${queryText}"...` : 'Inhalte werden geladen...'}</p>
-    `;
-    container.innerHTML = '';
-    container.appendChild(loaderWrapper);
-  }
-
-  function showError(message) {
-    errorMessage.textContent = message;
-    errorModal.classList.add('is-visible');
-  }
-
-  function hideError() {
-    errorModal.classList.remove('is-visible');
-  }
-
-  // Event-Listener für den Suchen-Button
-  searchBtn.addEventListener('click', executeSearch);
-  
-  // Event-Listener für die Enter-Taste im Suchfeld
-  searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      executeSearch();
-    }
-  });
-
-  // Event-Listener für den "OK"-Button im Fehler-Modal (jetzt kein Retry, da Fehler spezifischer sind)
-  retryBtn.addEventListener('click', () => {
-    hideError();
-  });
-
-  // Hauptsuchfunktion
-  async function executeSearch() {
-    const query = searchInput.value.trim();
-    if (!query) {
-      displayTorrents([], resultsContainer);
-      return;
-    }
-    
-    currentSearch = query;
-    const data = await fetchTorrents(query, resultsContainer);
-    
-    if (data !== null) { // Nur rendern, wenn Daten empfangen wurden (nicht null bei fatalem Fehler)
-      displayTorrents(data, resultsContainer);
-    }
-  }
-
-  // Initialisierung: Systemstatus prüfen und Start-Placeholder anzeigen
-  checkSystemStatus();
-  resultsContainer.innerHTML = `
-    <div class="placeholder fade-in">
-      <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
-    </div>
-  `;
-
-  // Stellt sicher, dass der Footer am unteren Rand bleibt
-  function adjustFooterPosition() {
-    const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
-    const windowHeight = window.innerHeight;
-    const footerHeight = mainFooter.offsetHeight;
-    if (contentHeight + footerHeight < windowHeight) {
-      mainFooter.style.position = 'fixed';
-      mainFooter.style.bottom = '0';
-      mainFooter.style.left = '0';
-      mainFooter.style.width = '100%';
-    } else {
-      mainFooter.style.position = 'static';
-    }
-  }
-
-  adjustFooterPosition();
-  window.addEventListener('resize', adjustFooterPosition);
-});
+    console.log('Zeige Lade-Indikator an.');
+    // Auch
