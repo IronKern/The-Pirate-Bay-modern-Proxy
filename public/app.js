@@ -7,48 +7,75 @@ Document.addEventListener('DOMContentLoaded', () => {
   const errorMessage = document.getElementById('errorMessage');
   const retryBtn = document.getElementById('retryBtn');
   const mainFooter = document.getElementById('main-footer');
+  const systemStatusText = document.getElementById('systemStatusText');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const systemErrorsList = document.getElementById('systemErrors');
+
+  // ACHTUNG: Hier musst du die URL deines deployten serverless Backends eintragen!
+  const SERVERLESS_API_URL = 'DEINE_SERVERLESS_BACKEND_URL/api/search'; // Beispiel: 'https://dein-projekt.vercel.app/api/search'
 
   let currentSearch = '';
 
-  // API-Anfrage mit Error-Handling
+  // --- Systemstatus-Prüfung ---
+  async function checkSystemStatus() {
+    statusIndicator.textContent = 'Wird geprüft...';
+    statusIndicator.className = 'status-indicator checking';
+    systemErrorsList.innerHTML = ''; // Alte Fehler löschen
+
+    try {
+      const response = await fetch(`${SERVERLESS_API_URL}?check_status=true`);
+      const result = await response.json();
+
+      if (result.status === 'Online') {
+        statusIndicator.textContent = 'Online';
+        statusIndicator.className = 'status-indicator online';
+      } else {
+        statusIndicator.textContent = 'Offline / Probleme';
+        statusIndicator.className = 'status-indicator offline';
+        if (result.errors && result.errors.length > 0) {
+          result.errors.forEach(err => {
+            const li = document.createElement('li');
+            li.textContent = err;
+            systemErrorsList.appendChild(li);
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Fehler beim Abrufen des Systemstatus:", error);
+      statusIndicator.textContent = 'Fehler (Konnte nicht prüfen)';
+      statusIndicator.className = 'status-indicator error';
+      const li = document.createElement('li');
+      li.textContent = `Verbindungsfehler: ${error.message}`;
+      systemErrorsList.appendChild(li);
+    }
+  }
+
+  // --- Torrent-Suche über das Serverless Backend ---
   async function fetchTorrents(query, targetContainer) {
-    let data = null;
     try {
       showLoading(targetContainer, query);
       
-      const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`); 
-      
-      if (!response.ok) {
-        console.warn(`Primary API failed with status ${response.status}. Trying fallback...`);
-        const fallbackResponse = await fetch(`/fallback-api/q.php?q=${encodeURIComponent(query)}`);
-        if (!fallbackResponse.ok) {
-          throw new Error(`All APIs failed: Primary status ${response.status}, Fallback status ${fallbackResponse.status}`);
+      const response = await fetch(`${SERVERLESS_API_URL}?q=${encodeURIComponent(query)}`);
+      const result = await response.json(); // Backend gibt immer JSON zurück
+
+      if (response.ok) {
+        if (result.data) {
+          return result.data;
+        } else if (result.message === "Keine Ergebnisse gefunden.") {
+          return []; // Backend hat keine Ergebnisse, aber erfolgreich geantwortet
+        } else {
+            // Unerwartetes erfolgreiches Ergebnis
+            throw new Error(`Unerwartete API-Antwort: ${JSON.stringify(result)}`);
         }
-        data = await fallbackResponse.json();
       } else {
-        data = await response.json();
+        // Fehler vom Backend erhalten (z.B. 400, 500, 503)
+        throw new Error(result.error || `Serverfehler: ${response.status} ${response.statusText}`);
       }
-      
-      // Zusätzliche Überprüfung, ob die erhaltenen Daten ein Array sind
-      if (!Array.isArray(data)) {
-        console.error("API returned non-array data:", data);
-        // Wenn die API ein leeres Array zurückgibt oder eine Fehlermeldung als Objekt,
-        // kann es sein, dass es keine Ergebnisse gibt oder ein Fehler aufgetreten ist.
-        // Wir behandeln dies als "keine Ergebnisse", es sei denn, es ist ein klarer API-Fehler.
-        if (data && typeof data === 'object' && data.error) {
-            throw new Error(`API-Antwortfehler: ${data.error}`);
-        }
-        return []; // Gib ein leeres Array zurück, wenn die Daten kein Array sind, aber kein klarer Fehler
-      }
-      
-      return data;
-      
     } catch (error) {
       console.error('API Error in fetchTorrents:', error);
-      showError(`API-Fehler: ${error.message || "Unbekannter Fehler bei der Datenabfrage."} Bitte versuche es später erneut.`);
-      return null; // Gib null zurück, um anzuzeigen, dass ein Fehler aufgetreten ist
+      showError(`Fehler bei der Suche: ${error.message || "Unbekannter Fehler."}`);
+      return null; // Gibt null zurück, um anzuzeigen, dass ein Fehler aufgetreten ist
     } finally {
-      // Lade-Placeholder nach der Anfrage entfernen
       const loader = targetContainer.querySelector('.loader-wrapper');
       if (loader) {
         loader.remove();
@@ -58,19 +85,15 @@ Document.addEventListener('DOMContentLoaded', () => {
 
   // Ergebnisse anzeigen mit Fade-In Animation
   function displayTorrents(data, container) {
-    // Vor dem Hinzufügen neuer Elemente alte entfernen und Fade-Out starten
-    // Überprüfe, ob Kinder existieren, bevor du durch sie iterierst
-    if (container.children.length > 0) {
-      Array.from(container.children).forEach(child => {
-        if (child.classList.contains('torrent-card') || child.classList.contains('placeholder')) {
-          child.classList.add('fade-out');
-          child.addEventListener('animationend', () => child.remove(), { once: true });
-        }
-      });
-    }
+    Array.from(container.children).forEach(child => {
+      if (child.classList.contains('torrent-card') || child.classList.contains('placeholder')) {
+        child.classList.add('fade-out');
+        child.addEventListener('animationend', () => child.remove(), { once: true });
+      }
+    });
 
     if (!data || data.length === 0) {
-      setTimeout(() => { // Verzögerung, um Fade-Out abzuschließen
+      setTimeout(() => {
         container.innerHTML = `
           <div class="placeholder fade-in">
             <p>Keine Ergebnisse gefunden für "${currentSearch || searchInput.value.trim()}".</p>
@@ -99,7 +122,7 @@ Document.addEventListener('DOMContentLoaded', () => {
 
   // Hilfsfunktionen
   function formatSize(bytes) {
-    if (bytes === undefined || bytes === null || isNaN(bytes)) return '0 MB'; // Zusätzliche Prüfung
+    if (bytes === undefined || bytes === null || isNaN(bytes)) return '0 MB';
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
     return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
@@ -140,32 +163,29 @@ Document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Event-Listener für den "Erneut versuchen"-Button im Fehler-Modal
+  // Event-Listener für den "OK"-Button im Fehler-Modal (jetzt kein Retry, da Fehler spezifischer sind)
   retryBtn.addEventListener('click', () => {
     hideError();
-    if (currentSearch) { // Versuche die letzte Suche erneut
-      executeSearch();
-    }
   });
 
   // Hauptsuchfunktion
   async function executeSearch() {
     const query = searchInput.value.trim();
     if (!query) {
-      displayTorrents([], resultsContainer); // Zeige leeren Zustand mit Placeholder an
+      displayTorrents([], resultsContainer);
       return;
     }
     
     currentSearch = query;
     const data = await fetchTorrents(query, resultsContainer);
     
-    // Nur rendern, wenn Daten empfangen wurden (nicht null bei Fehler)
-    if (data !== null) { 
+    if (data !== null) { // Nur rendern, wenn Daten empfangen wurden (nicht null bei fatalem Fehler)
       displayTorrents(data, resultsContainer);
     }
   }
 
-  // Initialisierung: Zeige den Start-Placeholder an
+  // Initialisierung: Systemstatus prüfen und Start-Placeholder anzeigen
+  checkSystemStatus();
   resultsContainer.innerHTML = `
     <div class="placeholder fade-in">
       <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
@@ -176,7 +196,7 @@ Document.addEventListener('DOMContentLoaded', () => {
   function adjustFooterPosition() {
     const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
     const windowHeight = window.innerHeight;
-    const footerHeight = mainFooter.offsetHeight; // Tatsächliche Höhe des Footers
+    const footerHeight = mainFooter.offsetHeight;
     if (contentHeight + footerHeight < windowHeight) {
       mainFooter.style.position = 'fixed';
       mainFooter.style.bottom = '0';
@@ -187,7 +207,6 @@ Document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Führe die Anpassung beim Laden und bei Größenänderung des Fensters aus
   adjustFooterPosition();
   window.addEventListener('resize', adjustFooterPosition);
 });
