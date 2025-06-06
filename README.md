@@ -1,6 +1,6 @@
 # The-Pirate-Bay-modern-Proxy
 
-#isnt ready yet don't have a front end 
+isnt ready yet don't have a front end 
 
 
 # 🏴‍☠️ Pirate Proxy  
@@ -25,7 +25,7 @@
 ### 🚀 **Quick Start**  
 1. Clone the repo:  
    ```bash
-   git clone fornoew nothing lol
+   git clone for now nothing lol
    ```
 2. Install dependencies:  
    ```bash
