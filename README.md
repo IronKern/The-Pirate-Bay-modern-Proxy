@@ -1,5 +1,7 @@
 # The-Pirate-Bay-modern-Proxy
 
+#isnt ready yet don't have a front end 
+
 
 # 🏴‍☠️ Pirate Proxy  
 *A modern, privacy-focused frontend for torrent search*  
@@ -23,7 +25,7 @@
 ### 🚀 **Quick Start**  
 1. Clone the repo:  
    ```bash
-   git clone https://github.com/your-username/pirate-proxy.git
+   git clone fornoew nothing lol
    ```
 2. Install dependencies:  
    ```bash
