@@ -4,14 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>⚡ Pirate Proxy | MyFlixi</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="blur-overlay"></div>
-  
   <main class="container">
-    <!-- Header mit Logo -->
     <header class="header">
       <div class="logo-container">
         <svg class="logo-icon" viewBox="0 0 24 24">
@@ -28,14 +24,12 @@
       </div>
     </header>
 
-    <!-- Suchbereich -->
-    <section class="search-section animate__animated animate__fadeIn">
+    <section class="search-section">
       <div class="search-box">
         <input 
           type="text" 
           id="searchInput" 
           placeholder="Suche Filme, Serien, Games..." 
-          class="animate__animated animate__pulse animate__infinite"
         >
         <button id="searchBtn">
           <svg class="search-icon" viewBox="0 0 24 24">
@@ -45,24 +39,25 @@
       </div>
     </section>
 
-    <!-- Ergebnisse -->
+    <section class="recommendations-section">
+      <h2 class="section-title">Empfehlungen</h2>
+      <div id="recommendations" class="results-grid">
+        </div>
+    </section>
+
     <section id="results" class="results-grid">
-      <div class="placeholder animate__animated animate__fadeIn">
-        <div class="neon-loader"></div>
-        <p>Gib einen Suchbegriff ein</p>
+      <div class="placeholder">
+        <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer animate__animated animate__fadeInUp">
+    <footer class="footer">
       <p>© 2024 Pirate Proxy | <span class="brand">MyFlixi</span> Technologies</p>
-      <div class="footer-glow"></div>
     </footer>
   </main>
 
-  <!-- Error Modal (hidden by default) -->
   <div id="errorModal" class="modal">
-    <div class="modal-content animate__animated animate__bounceIn">
+    <div class="modal-content">
       <h3>🚨 API-Fehler</h3>
       <p id="errorMessage">Die Anfrage konnte nicht verarbeitet werden.</p>
       <button id="retryBtn">Erneut versuchen</button>
