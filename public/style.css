@@ -1,0 +1,14 @@
+/* Dark Mode Baseline */
+body.dark {
+  background: #0F0F15;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #1E1E2D;
+}
+::-webkit-scrollbar-thumb {
+  background: #8B5CF6;
+  border-radius: 4px;
+}
