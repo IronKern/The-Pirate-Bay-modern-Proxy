@@ -3,7 +3,7 @@ Document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const searchBtn = document.getElementById('searchBtn');
   const resultsContainer = document.getElementById('results');
-  const recommendationsContainer = document.getElementById('recommendations'); // Neuer Container für Empfehlungen
+  const recommendationsContainer = document.getElementById('recommendations');
   const errorModal = document.getElementById('errorModal');
   const errorMessage = document.getElementById('errorMessage');
   const retryBtn = document.getElementById('retryBtn');
@@ -15,7 +15,6 @@ Document.addEventListener('DOMContentLoaded', () => {
     try {
       showLoading(targetContainer, query);
       
-      // Nutze den neuen API-Endpunkt, um die bestehenden Endpunkte nicht zu stören
       const response = await fetch(`/api/q.php?q=${encodeURIComponent(query)}`); 
       
       if (!response.ok) {
@@ -35,38 +34,51 @@ Document.addEventListener('DOMContentLoaded', () => {
       showError(`API-Fehler: ${error.message}`);
       return null;
     } finally {
-      // Das Lade-Placeholder wird hier entfernt, wenn Daten geladen wurden
-      // oder ein Fehler auftrat
-      if (targetContainer.querySelector('.placeholder')) {
-        targetContainer.querySelector('.placeholder').remove();
+      // Lade-Placeholder nach der Anfrage entfernen
+      const loader = targetContainer.querySelector('.loader-wrapper');
+      if (loader) {
+        loader.remove();
       }
     }
   }
 
-  // Ergebnisse/Empfehlungen anzeigen
+  // Ergebnisse/Empfehlungen anzeigen mit Fade-In Animation
   function displayTorrents(data, container) {
+    // Vor dem Hinzufügen neuer Elemente alte entfernen und Fade-Out starten
+    Array.from(container.children).forEach(child => {
+      if (child.classList.contains('torrent-card') || child.classList.contains('placeholder')) {
+        child.classList.add('fade-out');
+        child.addEventListener('animationend', () => child.remove(), { once: true });
+      }
+    });
+
     if (!data || data.length === 0) {
-      container.innerHTML = `
-        <div class="placeholder">
-          <p>Keine Ergebnisse gefunden.</p>
-        </div>
-      `;
+      setTimeout(() => { // Verzögerung, um Fade-Out abzuschließen
+        container.innerHTML = `
+          <div class="placeholder fade-in">
+            <p>Keine Ergebnisse gefunden.</p>
+          </div>
+        `;
+      }, 200); 
       return;
     }
     
-    container.innerHTML = data.map(torrent => `
-      <div class="torrent-card">
-        <h3 class="torrent-name">${torrent.name || 'Unbekannter Torrent'}</h3>
-        <div class="torrent-meta">
-          <span>💾 ${formatSize(torrent.size)}</span>
-          <span>🔼 ${torrent.seeders || 0}</span>
-          <span>🔽 ${torrent.leechers || 0}</span>
+    // Neue Ergebnisse hinzufügen und Fade-In starten
+    setTimeout(() => { // Verzögerung, um Fade-Out abzuschließen
+      container.innerHTML = data.map(torrent => `
+        <div class="torrent-card fade-in">
+          <h3 class="torrent-name">${torrent.name || 'Unbekannter Torrent'}</h3>
+          <div class="torrent-meta">
+            <span>💾 ${formatSize(torrent.size)}</span>
+            <span>🔼 ${torrent.seeders || 0}</span>
+            <span>🔽 ${torrent.leechers || 0}</span>
+          </div>
+          <a href="magnet:?xt=urn:btih:${torrent.info_hash}" class="magnet-link">
+            Magnet-Link
+          </a>
         </div>
-        <a href="magnet:?xt=urn:btih:${torrent.info_hash}" class="magnet-link">
-          Magnet-Link
-        </a>
-      </div>
-    `).join('');
+      `).join('');
+    }, 200); // Kurze Verzögerung, damit die Fade-Out-Animation sichtbar wird
   }
 
   // Hilfsfunktionen
@@ -77,22 +89,33 @@ Document.addEventListener('DOMContentLoaded', () => {
     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
   }
 
+  // Verbessertes Lade-Overlay
   function showLoading(container, queryText) {
-    container.innerHTML = `
-      <div class="placeholder">
-        <div class="loader"></div>
-        <p>Suche nach "${queryText}"...</p>
-      </div>
+    // Vorhandene Inhalte ausblenden
+    Array.from(container.children).forEach(child => {
+      child.classList.add('fade-out');
+      child.addEventListener('animationend', () => child.style.display = 'none', { once: true });
+    });
+
+    // Loader hinzufügen
+    const loaderWrapper = document.createElement('div');
+    loaderWrapper.classList.add('loader-wrapper', 'fade-in');
+    loaderWrapper.innerHTML = `
+      <div class="loader"></div>
+      <p>${queryText ? `Suche nach "${queryText}"...` : 'Inhalte werden geladen...'}</p>
     `;
+    container.innerHTML = ''; // Entferne alte Inhalte sofort, um Platz für Loader zu schaffen
+    container.appendChild(loaderWrapper);
   }
+
 
   function showError(message) {
     errorMessage.textContent = message;
-    errorModal.style.display = 'flex';
+    errorModal.classList.add('is-visible'); // Klasse für Sichtbarkeit
   }
 
   function hideError() {
-    errorModal.style.display = 'none';
+    errorModal.classList.remove('is-visible');
   }
 
   // Event-Listener
@@ -111,11 +134,7 @@ Document.addEventListener('DOMContentLoaded', () => {
   async function executeSearch() {
     const query = searchInput.value.trim();
     if (!query) {
-      resultsContainer.innerHTML = `
-        <div class="placeholder">
-          <p>Bitte gib einen Suchbegriff ein.</p>
-        </div>
-      `;
+      displayTorrents([], resultsContainer); // Zeige leeren Zustand mit Placeholder an
       return;
     }
     
@@ -124,7 +143,7 @@ Document.addEventListener('DOMContentLoaded', () => {
     
     if (data) {
       displayTorrents(data, resultsContainer);
-      // Wenn eine Suche durchgeführt wird, leere die Empfehlungen
+      // Wenn eine Suche durchgeführt wird, Empfehlungen ausblenden oder aktualisieren
       recommendationsContainer.innerHTML = ''; 
       document.querySelector('.recommendations-section .section-title').style.display = 'none';
     }
@@ -132,12 +151,10 @@ Document.addEventListener('DOMContentLoaded', () => {
 
   // Empfehlungen beim Laden der Seite
   async function loadRecommendations() {
-    // Hier kannst du einige Standard-Suchbegriffe für Empfehlungen verwenden
-    // Oder eine dedizierte API für zufällige/beliebte Torrents (falls vorhanden)
-    const recommendedQueries = ["linux", "ubuntu", "public domain movies"]; 
+    const recommendedQueries = ["linux", "ubuntu", "public domain movies", "free software"]; 
     const randomQuery = recommendedQueries[Math.floor(Math.random() * recommendedQueries.length)];
 
-    document.querySelector('.recommendations-section .section-title').style.display = 'block'; // Titel anzeigen
+    document.querySelector('.recommendations-section .section-title').style.display = 'block'; 
     const data = await fetchTorrents(randomQuery, recommendationsContainer);
     if (data) {
       displayTorrents(data, recommendationsContainer);
@@ -147,7 +164,7 @@ Document.addEventListener('DOMContentLoaded', () => {
   // Initialisierung
   loadRecommendations(); // Lade Empfehlungen beim Start
   resultsContainer.innerHTML = `
-    <div class="placeholder">
+    <div class="placeholder fade-in">
       <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
     </div>
   `;
