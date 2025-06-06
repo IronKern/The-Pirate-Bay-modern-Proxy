@@ -1,4 +1,4 @@
-module.exports = {
+Module.exports = {
   trailingSlash: true,
   async rewrites() {
     // Liste mit Backup-APIs, falls apibay.org blockiert ist
