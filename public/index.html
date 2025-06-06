@@ -7,62 +7,64 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <main class="container">
-    <header class="header">
-      <div class="logo-container">
-        <svg class="logo-icon" viewBox="0 0 24 24">
-          <path d="M12 2L4 7v10l8 5 8-5V7L12 2zm0 2.5L18 9v6l-6 3.5-6-3.5V9l6-3.5z" fill="#FFF"/>
-          <path d="M12 6L6 9v6l6 3.5 6-3.5V9l-6-3z" fill="url(#logo-gradient)"/>
-          <defs>
-            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#8B5CF6"/>
-              <stop offset="100%" stop-color="#EC4899"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <h1 class="logo-text">Pirate<span>Proxy</span></h1>
-      </div>
-    </header>
-
-    <section class="search-section">
-      <div class="search-box">
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="Suche Filme, Serien, Games..." 
-        >
-        <button id="searchBtn">
-          <svg class="search-icon" viewBox="0 0 24 24">
-            <path d="M15.5 14h-.8l-.3-.3c1-1.1 1.6-2.6 1.6-4.2C16 6.5 13.5 4 10.5 4S5 6.5 5 9.5 7.5 15 10.5 15c1.6 0 3.1-.6 4.2-1.6l.3.3v.8l5 5 1.5-1.5-5-5z"/>
+  <div class="content-wrapper">
+    <main class="container">
+      <header class="header">
+        <div class="logo-container">
+          <svg class="logo-icon" viewBox="0 0 24 24">
+            <path d="M12 2L4 7v10l8 5 8-5V7L12 2zm0 2.5L18 9v6l-6 3.5-6-3.5V9l6-3.5z" fill="#FFF"/>
+            <path d="M12 6L6 9v6l6 3.5 6-3.5V9l-6-3z" fill="url(#logo-gradient)"/>
+            <defs>
+              <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8B5CF6"/>
+                <stop offset="100%" stop-color="#EC4899"/>
+              </linearGradient>
+            </defs>
           </svg>
-        </button>
-      </div>
-    </section>
-
-    <section class="recommendations-section">
-      <h2 class="section-title">Empfehlungen</h2>
-      <div id="recommendations" class="results-grid">
+          <h1 class="logo-text">Pirate<span>Proxy</span></h1>
         </div>
-    </section>
+      </header>
 
-    <section id="results" class="results-grid">
-      <div class="placeholder">
-        <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
+      <section class="search-section">
+        <div class="search-box">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Suche Filme, Serien, Games..." 
+          >
+          <button id="searchBtn">
+            <svg class="search-icon" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.8l-.3-.3c1-1.1 1.6-2.6 1.6-4.2C16 6.5 13.5 4 10.5 4S5 6.5 5 9.5 7.5 15 10.5 15c1.6 0 3.1-.6 4.2-1.6l.3.3v.8l5 5 1.5-1.5-5-5z"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="recommendations-section">
+        <h2 class="section-title">Empfehlungen</h2>
+        <div id="recommendations" class="results-grid">
+          </div>
+      </section>
+
+      <section id="results" class="results-grid">
+        <div class="placeholder">
+          <p>Gib einen Suchbegriff ein, um Ergebnisse zu sehen.</p>
+        </div>
+      </section>
+    </main>
+
+    <div id="errorModal" class="modal">
+      <div class="modal-content">
+        <h3>🚨 API-Fehler</h3>
+        <p id="errorMessage">Die Anfrage konnte nicht verarbeitet werden.</p>
+        <button id="retryBtn">Erneut versuchen</button>
       </div>
-    </section>
-
-    <footer class="footer">
-      <p>© 2024 Pirate Proxy | <span class="brand">MyFlixi</span> Technologies</p>
-    </footer>
-  </main>
-
-  <div id="errorModal" class="modal">
-    <div class="modal-content">
-      <h3>🚨 API-Fehler</h3>
-      <p id="errorMessage">Die Anfrage konnte nicht verarbeitet werden.</p>
-      <button id="retryBtn">Erneut versuchen</button>
     </div>
   </div>
+
+  <footer id="main-footer" class="footer">
+    <p>© 2024 Pirate Proxy | <span class="brand">MyFlixi</span> Technologies</p>
+  </footer>
 
   <script src="/app.js"></script>
 </body>
