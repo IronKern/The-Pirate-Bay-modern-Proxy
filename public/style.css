@@ -32,7 +32,8 @@ body {
 /* Wrapper für den Hauptinhalt, damit der Footer fest sitzt */
 .content-wrapper {
   flex: 1; /* Nimmt den restlichen Platz ein */
-  min-height: calc(100vh - 80px); /* Annahme: Footer-Höhe ca. 80px */
+  display: flex; /* Flexbox für den Wrapper */
+  flex-direction: column; /* Inhalte sollen vertikal gestapelt sein */
 }
 
 .container {
@@ -41,6 +42,7 @@ body {
   padding: 1.5rem;
   position: relative;
   z-index: 1; /* Stellt sicher, dass Inhalte über dem Hintergrund-Glow liegen */
+  flex-grow: 1; /* Lässt den Container sich ausdehnen */
 }
 
 /* Hintergrund-Glow-Effekt */
@@ -157,6 +159,7 @@ body::before {
 }
 
 /* ---------- Sektionstitel (Falls noch benötigt) ---------- */
+/* HINWEIS: Da Empfehlungen entfernt wurden, wird dieser Stil nur verwendet, wenn du ihn an anderer Stelle einsetzt. */
 .section-title {
   font-size: 1.5rem;
   font-weight: 600;
