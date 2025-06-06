@@ -12,6 +12,7 @@ Document.addEventListener('DOMContentLoaded', () => {
 
   // API-Anfrage mit Error-Handling
   async function fetchTorrents(query, targetContainer) {
+    let data = null;
     try {
       showLoading(targetContainer, query);
       
@@ -23,22 +24,29 @@ Document.addEventListener('DOMContentLoaded', () => {
         if (!fallbackResponse.ok) {
           throw new Error(`All APIs failed: Primary status ${response.status}, Fallback status ${fallbackResponse.status}`);
         }
-        const fallbackData = await fallbackResponse.json();
-        return fallbackData;
+        data = await fallbackResponse.json();
+      } else {
+        data = await response.json();
       }
       
-      const data = await response.json();
-      
+      // Zusätzliche Überprüfung, ob die erhaltenen Daten ein Array sind
       if (!Array.isArray(data)) {
-        throw new Error('Invalid API response: Expected array, got something else.');
+        console.error("API returned non-array data:", data);
+        // Wenn die API ein leeres Array zurückgibt oder eine Fehlermeldung als Objekt,
+        // kann es sein, dass es keine Ergebnisse gibt oder ein Fehler aufgetreten ist.
+        // Wir behandeln dies als "keine Ergebnisse", es sei denn, es ist ein klarer API-Fehler.
+        if (data && typeof data === 'object' && data.error) {
+            throw new Error(`API-Antwortfehler: ${data.error}`);
+        }
+        return []; // Gib ein leeres Array zurück, wenn die Daten kein Array sind, aber kein klarer Fehler
       }
       
       return data;
       
     } catch (error) {
-      console.error('API Error:', error);
-      showError(`API-Fehler: ${error.message}. Bitte versuche es später erneut.`);
-      return null;
+      console.error('API Error in fetchTorrents:', error);
+      showError(`API-Fehler: ${error.message || "Unbekannter Fehler bei der Datenabfrage."} Bitte versuche es später erneut.`);
+      return null; // Gib null zurück, um anzuzeigen, dass ein Fehler aufgetreten ist
     } finally {
       // Lade-Placeholder nach der Anfrage entfernen
       const loader = targetContainer.querySelector('.loader-wrapper');
@@ -51,18 +59,21 @@ Document.addEventListener('DOMContentLoaded', () => {
   // Ergebnisse anzeigen mit Fade-In Animation
   function displayTorrents(data, container) {
     // Vor dem Hinzufügen neuer Elemente alte entfernen und Fade-Out starten
-    Array.from(container.children).forEach(child => {
-      if (child.classList.contains('torrent-card') || child.classList.contains('placeholder')) {
-        child.classList.add('fade-out');
-        child.addEventListener('animationend', () => child.remove(), { once: true });
-      }
-    });
+    // Überprüfe, ob Kinder existieren, bevor du durch sie iterierst
+    if (container.children.length > 0) {
+      Array.from(container.children).forEach(child => {
+        if (child.classList.contains('torrent-card') || child.classList.contains('placeholder')) {
+          child.classList.add('fade-out');
+          child.addEventListener('animationend', () => child.remove(), { once: true });
+        }
+      });
+    }
 
     if (!data || data.length === 0) {
       setTimeout(() => { // Verzögerung, um Fade-Out abzuschließen
         container.innerHTML = `
           <div class="placeholder fade-in">
-            <p>Keine Ergebnisse gefunden für "${currentSearch}".</p>
+            <p>Keine Ergebnisse gefunden für "${currentSearch || searchInput.value.trim()}".</p>
           </div>
         `;
       }, 200); 
@@ -88,7 +99,7 @@ Document.addEventListener('DOMContentLoaded', () => {
 
   // Hilfsfunktionen
   function formatSize(bytes) {
-    if (!bytes) return '0 MB';
+    if (bytes === undefined || bytes === null || isNaN(bytes)) return '0 MB'; // Zusätzliche Prüfung
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
     return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
@@ -148,7 +159,8 @@ Document.addEventListener('DOMContentLoaded', () => {
     currentSearch = query;
     const data = await fetchTorrents(query, resultsContainer);
     
-    if (data) {
+    // Nur rendern, wenn Daten empfangen wurden (nicht null bei Fehler)
+    if (data !== null) { 
       displayTorrents(data, resultsContainer);
     }
   }
@@ -164,7 +176,8 @@ Document.addEventListener('DOMContentLoaded', () => {
   function adjustFooterPosition() {
     const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
     const windowHeight = window.innerHeight;
-    if (contentHeight < windowHeight) {
+    const footerHeight = mainFooter.offsetHeight; // Tatsächliche Höhe des Footers
+    if (contentHeight + footerHeight < windowHeight) {
       mainFooter.style.position = 'fixed';
       mainFooter.style.bottom = '0';
       mainFooter.style.left = '0';
