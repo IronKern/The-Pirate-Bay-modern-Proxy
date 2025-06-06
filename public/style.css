@@ -1,14 +1,185 @@
-/* Dark Mode Baseline */
-body.dark {
-  background: #0F0F15;
+/* Globale Styles */
+:root {
+  --primary: #8b5cf6;
+  --primary-dark: #7c3aed;
+  --bg: #000000;
+  --card-bg: #111111;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  background: #1E1E2D;
+body {
+  background: var(--bg);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
 }
-::-webkit-scrollbar-thumb {
-  background: #8B5CF6;
-  border-radius: 4px;
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
+
+/* Glitch-Effekt für Titel */
+.title-glitch {
+  position: relative;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-align: center;
+  margin: 2rem 0;
+  letter-spacing: 2px;
+}
+
+.title-glitch::before, .title-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.title-glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 #00f7ff;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+.title-glitch::after {
+  left: -2px;
+  text-shadow: -2px 0 #ff00c1;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim-2 2s infinite linear alternate-reverse;
+}
+
+/* Suchleiste mit Animation */
+.search-box {
+  display: flex;
+  max-width: 600px;
+  margin: 2rem auto;
+  position: relative;
+}
+
+#searchInput {
+  flex: 1;
+  padding: 15px 20px;
+  border: 2px solid #333;
+  border-radius: 30px;
+  background: #111;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s;
+}
+
+#searchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+#searchBtn {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#searchBtn:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+/* Ergebnisse */
+#results {
+  margin-top: 2rem;
+}
+
+.torrent-card {
+  background: var(--card-bg);
+  border-left: 4px solid var(--primary);
+  border-radius: 5px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.torrent-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.1);
+}
+
+.torrent-name {
+  font-size: 1.2rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.torrent-meta {
+  display: flex;
+  gap: 1rem;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.magnet-link {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--primary);
+  border-radius: 20px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.magnet-link:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
+
+/* Platzhalter & Ladeanimation */
+.placeholder {
+  text-align: center;
+  color: #555;
+  margin-top: 4rem;
+}
+
+.pulse-loader {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Fehlermeldung */
+.error-message {
+  text-align: center;
+  color: #ff5555;
+  padding: 2rem;
+  border: 1px solid #ff5555;
+  border-radius: 5px;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+/* Animationen */
+@keyframes glitch
